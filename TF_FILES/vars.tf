@@ -21,3 +21,9 @@ variable "hwc_az" {
   default     = "sa-brazil-1a"
   description = "Availability Zone where resources will be provisioned"
 }
+
+variable "postgresql_pwd" {
+  type        = string
+  default     = "__Huawei1234!__"
+  description = "Password for PostgreSQL database."
+}

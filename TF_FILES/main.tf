@@ -28,7 +28,7 @@ resource "huaweicloud_vpc_subnet" "tf_subnet" {
 	vpc_id = huaweicloud_vpc.tf_vpc.id
 }
 
-# Create a EIP.
+# Create an EIP.
 resource "huaweicloud_vpc_eip" "tf_eip" {
 	publicip {
 		type = "5_bgp"
@@ -38,5 +38,45 @@ resource "huaweicloud_vpc_eip" "tf_eip" {
 		size = 10
 		share_type = "PER"
 		charge_mode = "traffic"
+	}
+}
+
+# Create an ECS
+resource "huaweicloud_compute_instance" "tf_instance" {
+	name = "tf-instance"
+	image_id = "5f67dd87-7685-4a71-ae63-1dca02fd724c"
+	flavor_id = "s6.medium.2"
+	security_groups = ["default"]
+	availability_zone = var.hwc_az
+
+	network {
+		uuid = huaweicloud_vpc_subnet.tf_subnet.id
+	}
+}
+
+# Associate the EIP with the ECS.
+resource "huaweicloud_compute_eip_associate" "associated" {
+	public_ip = huaweicloud_vpc_eip.tf_eip.address
+	instance_id = huaweicloud_compute_instance.tf_instance.id
+}
+
+# Create a PostreSQL RDS.
+resource "huaweicloud_rds_instance" "rds_instance" {
+	name = "rds_instance"
+	flavor = "rds.pg.n1.large.2"
+	vpc_id = huaweicloud_vpc.tf_vpc.id
+	subnet_id = huaweicloud_vpc_subnet.tf_subnet.id
+	security_group_id = "ae59ae1f-6141-4db1-899a-379bc493c6e8"
+	availability_zone = [var.hwc_az]
+
+	db {
+		type = "PostgreSQL"
+		version = "12"
+		password = var.postgresql_pwd
+	}
+
+	volume {
+		type = "CLOUDSSD"
+		size = 40
 	}
 }
