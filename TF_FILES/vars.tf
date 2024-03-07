@@ -27,3 +27,9 @@ variable "postgresql_pwd" {
   default     = "__Huawei1234!__"
   description = "Password for PostgreSQL database."
 }
+
+variable "hwc_ecs_pwd" {
+  type        = string
+  default     = "__Huawei1234!__"
+  description = "Password for ECS."
+}

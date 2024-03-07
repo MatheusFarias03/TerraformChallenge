@@ -48,6 +48,7 @@ resource "huaweicloud_compute_instance" "tf_instance" {
 	flavor_id = "s6.medium.2"
 	security_groups = ["default"]
 	availability_zone = var.hwc_az
+	admin_pass = var.hwc_ecs_pwd
 
 	network {
 		uuid = huaweicloud_vpc_subnet.tf_subnet.id
@@ -60,23 +61,41 @@ resource "huaweicloud_compute_eip_associate" "associated" {
 	instance_id = huaweicloud_compute_instance.tf_instance.id
 }
 
-# Create a PostreSQL RDS.
-resource "huaweicloud_rds_instance" "rds_instance" {
-	name = "rds_instance"
-	flavor = "rds.pg.n1.large.2"
-	vpc_id = huaweicloud_vpc.tf_vpc.id
-	subnet_id = huaweicloud_vpc_subnet.tf_subnet.id
-	security_group_id = "ae59ae1f-6141-4db1-899a-379bc493c6e8"
-	availability_zone = [var.hwc_az]
+resource "null_resource" "remote_command" {
+	depends_on = [huaweicloud_compute_eip_associate.associated]
 
-	db {
-		type = "PostgreSQL"
-		version = "12"
-		password = var.postgresql_pwd
+	connection {
+		type = "ssh"
+		user = "root"
+		password = var.hwc_ecs_pwd
+		host = huaweicloud_vpc_eip.tf_eip.address
 	}
 
-	volume {
-		type = "CLOUDSSD"
-		size = 40
+	provisioner "remote-exec" {
+		inline = [
+			"touch hello_world.txt",
+			"echo \"Hello, World!\" >> hello_world.txt"
+		]
 	}
 }
+
+# Create a PostreSQL RDS.
+# resource "huaweicloud_rds_instance" "rds_instance" {
+# 	name = "rds_instance"
+# 	flavor = "rds.pg.n1.large.2"
+# 	vpc_id = huaweicloud_vpc.tf_vpc.id
+# 	subnet_id = huaweicloud_vpc_subnet.tf_subnet.id
+# 	security_group_id = "ae59ae1f-6141-4db1-899a-379bc493c6e8"
+# 	availability_zone = [var.hwc_az]
+
+# 	db {
+# 		type = "PostgreSQL"
+# 		version = "12"
+# 		password = var.postgresql_pwd
+# 	}
+
+# 	volume {
+# 		type = "CLOUDSSD"
+# 		size = 40
+# 	}
+# }
