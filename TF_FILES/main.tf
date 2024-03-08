@@ -73,8 +73,8 @@ resource "null_resource" "remote_command" {
 
 	provisioner "remote-exec" {
 		inline = [
-			"touch hello_world.txt",
-			"echo \"Hello, World!\" >> hello_world.txt"
+			"sudo apt update -y",
+			"sudo apt install docker.io -y"
 		]
 	}
 }
