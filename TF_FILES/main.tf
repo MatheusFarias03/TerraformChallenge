@@ -61,8 +61,12 @@ resource "huaweicloud_compute_eip_associate" "associated" {
 	instance_id = huaweicloud_compute_instance.tf_instance.id
 }
 
-resource "null_resource" "remote_command" {
-	depends_on = [huaweicloud_compute_eip_associate.associated]
+# Send command to install docker in Huawei's ECS.
+resource "null_resource" "install_docker" {
+	depends_on = [
+		huaweicloud_compute_eip_associate.associated,
+		huaweicloud_compute_instance.tf_instance
+	]
 
 	connection {
 		type = "ssh"
@@ -75,6 +79,39 @@ resource "null_resource" "remote_command" {
 		inline = [
 			"sudo apt update -y",
 			"sudo apt install docker.io -y"
+		]
+	}
+}
+
+# On the local machine, push the image to Huawei's SWR.
+resource "null_resource" "push_image_swr" {
+	depends_on = [null_resource.install_docker]
+
+	provisioner "local-exec" {
+		interpreter = ["PowerShell", "-Command"]
+		command = <<-EOT
+			${var.docker_login} ;
+			docker push ${var.docker_image}
+		EOT
+	}
+}
+
+# On Huawei's ECS, pull the image from SWR.
+resource "null_resource" "pull_image_swr" {
+	depends_on = [null_resource.push_image_swr]
+
+	connection {
+		type = "ssh"
+		user = "root"
+		password = var.hwc_ecs_pwd
+		host = huaweicloud_vpc_eip.tf_eip.address
+	}
+
+	provisioner "remote-exec" {
+		inline = [
+			"${var.docker_login}",
+			"docker pull ${var.docker_image}",
+			"docker run -d -p 5000:5000 ${var.docker_image}"
 		]
 	}
 }

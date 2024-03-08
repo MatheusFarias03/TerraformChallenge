@@ -33,3 +33,14 @@ variable "hwc_ecs_pwd" {
   default     = "__Huawei1234!__"
   description = "Password for ECS."
 }
+
+variable "docker_login" {
+  type        = string
+  nullable    = false
+  description = "Login command to connect to SWR's registry."
+}
+
+variable "docker_image" {
+  type        = string
+  default     = "swr.sa-brazil-1.myhuaweicloud.com/matheus-org/tf_image_test"
+}
