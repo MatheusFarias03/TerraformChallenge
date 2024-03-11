@@ -1,12 +1,12 @@
 variable "hwc_ak" {
   type        = string
-  default     = "KZLBCHFDFAGMFHDXRDAC"
+  default     = "X1LUJAQPTHZPVQEZDBYL"
   description = "Access Key of Huawei Cloud account."
 }
 
 variable "hwc_sk" {
   type        = string
-  default     = "EV8SV6HENxMfquYFDhNng6Fl2FbIpbcqTXRCOyPf"
+  default     = "qq8OkFqq4n2Dzn6ug9nLpfpM1eOAkEQ6YfYfjIH0"
   description = "Secret Key of Huawei Cloud account."
 }
 
@@ -40,7 +40,19 @@ variable "docker_login" {
   description = "Login command to connect to SWR's registry."
 }
 
-variable "docker_image" {
+variable "swr_org" {
   type        = string
-  default     = "swr.sa-brazil-1.myhuaweicloud.com/matheus-org/tf_image_test"
+  default     = "tf_org"
+  description = "Name of SWR's organization."
+}
+
+variable "image" {
+  type        = string
+  default     = "tf_image_test"
+  description = "Name of the image."
+}
+
+variable "docker_path" {
+  type        = string
+  default     = "C:\\Users\\m50037921\\Documents\\Learning\\TerraformChallenge\\WEBAPP\\"
 }

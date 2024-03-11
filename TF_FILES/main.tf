@@ -61,11 +61,33 @@ resource "huaweicloud_compute_eip_associate" "associated" {
 	instance_id = huaweicloud_compute_instance.tf_instance.id
 }
 
+# Create organization.
+resource "huaweicloud_swr_organization" "tf_org" {
+  name = var.swr_org
+}
+
+# On the local machine, push the image to Huawei's SWR.
+resource "null_resource" "push_image_swr" {
+	depends_on = [
+		huaweicloud_swr_organization.tf_org
+	]
+
+	provisioner "local-exec" {
+		interpreter = ["PowerShell", "-Command"]
+		command = <<-EOT
+			${var.docker_login} ;
+            docker build -t swr.${var.hwc_region}.myhuaweicloud.com/${var.swr_org}/${var.image} ${var.docker_path} ;
+			docker push swr.${var.hwc_region}.myhuaweicloud.com/${var.swr_org}/${var.image}
+		EOT
+	}
+}
+
 # Send command to install docker in Huawei's ECS.
 resource "null_resource" "install_docker" {
 	depends_on = [
 		huaweicloud_compute_eip_associate.associated,
-		huaweicloud_compute_instance.tf_instance
+		huaweicloud_compute_instance.tf_instance,
+		null_resource.push_image_swr
 	]
 
 	connection {
@@ -78,40 +100,10 @@ resource "null_resource" "install_docker" {
 	provisioner "remote-exec" {
 		inline = [
 			"sudo apt update -y",
-			"sudo apt install docker.io -y"
-		]
-	}
-}
-
-# On the local machine, push the image to Huawei's SWR.
-resource "null_resource" "push_image_swr" {
-	depends_on = [null_resource.install_docker]
-
-	provisioner "local-exec" {
-		interpreter = ["PowerShell", "-Command"]
-		command = <<-EOT
-			${var.docker_login} ;
-			docker push ${var.docker_image}
-		EOT
-	}
-}
-
-# On Huawei's ECS, pull the image from SWR.
-resource "null_resource" "pull_image_swr" {
-	depends_on = [null_resource.push_image_swr]
-
-	connection {
-		type = "ssh"
-		user = "root"
-		password = var.hwc_ecs_pwd
-		host = huaweicloud_vpc_eip.tf_eip.address
-	}
-
-	provisioner "remote-exec" {
-		inline = [
+			"sudo apt install docker.io -y",
 			"${var.docker_login}",
-			"docker pull ${var.docker_image}",
-			"docker run -d -p 5000:5000 ${var.docker_image}"
+			"docker pull swr.${var.hwc_region}.myhuaweicloud.com/${var.swr_org}/${var.image}",
+			"docker run -d -p 5000:5000 swr.${var.hwc_region}.myhuaweicloud.com/${var.swr_org}/${var.image}"
 		]
 	}
 }
