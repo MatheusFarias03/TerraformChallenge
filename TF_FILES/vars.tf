@@ -1,12 +1,12 @@
 variable "hwc_ak" {
   type        = string
-  default     = "X1LUJAQPTHZPVQEZDBYL"
+  default     = "R1KWDDYHPHB00VBUHOPW"
   description = "Access Key of Huawei Cloud account."
 }
 
 variable "hwc_sk" {
   type        = string
-  default     = "qq8OkFqq4n2Dzn6ug9nLpfpM1eOAkEQ6YfYfjIH0"
+  default     = "5HONPI31bCY7swDcFKc6JaU4PjtIVfm8omeGFQd4"
   description = "Secret Key of Huawei Cloud account."
 }
 
