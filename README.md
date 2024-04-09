@@ -1,6 +1,6 @@
 # Terraform Configuration for Provisioning Infrastructure on HUAWEI CLOUD
 
-This Terraform configuration automates the provisioning of infrastructure resources on HUAWEI CLOUD. It creates a Virtual Private Cloud (VPC), subnet, Elastic IP (EIP), Elastic Cloud Server (ECS) instance, and associates the EIP with the ECS instance. Additionally, it sets up an organization in Huawei's SWR (ServiceStage Image Repository), pushes a Docker image to the SWR repository, installs Docker on the ECS instance, and runs the image on it.
+This Terraform configuration automates the provisioning of infrastructure resources on HUAWEI CLOUD. It creates a Virtual Private Cloud (VPC), subnet, Elastic IP (EIP), Elastic Cloud Server (ECS) instance, and associates the EIP with the ECS instance. Additionally, it sets up an organization in Huawei's SWR (Software Image Repository), pushes a Docker image to the SWR repository, installs Docker on the ECS instance, and runs the image on it.
 
 ## Prerequisites
 
